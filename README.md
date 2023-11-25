@@ -1,4 +1,4 @@
-# MOvie API Project
+# Movie API Project
 
 Para correr el juego debes seguir las siguientes intrucciones en la terminal
 
