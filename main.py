@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Body, Query
+from fastapi import FastAPI, HTTPException, Body, Query, Path
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 from typing import Optional
@@ -59,8 +59,8 @@ def message():
 def get_movies():
     return movies
 
-@app.get('/movies/{id}')
-def get_movie(id: int):
+@app.get('/movies/{id}', tags=['movies'])
+def get_movie(id: int = Path(ge=1, le=2000)):
     try:
         return list(filter(lambda movie: movie['id'] == id, movies))[0]
     except IndexError as error:
@@ -68,9 +68,8 @@ def get_movie(id: int):
         raise HTTPException(status_code=404, detail=f"Movie with id {id} not found")
     
 @app.get('/movies/', tags=['movies'])
-def get_movies_by_category(category:str, year: int):
+def get_movies_by_category(category:str = Query(min_length=5, max_length=15)):
     return [item for item in movies if item['category'] == category]
-    # return category, year
 
 @app.post('/movies', tags=['movies'])
 def create_movie(movie: Movie):
