@@ -28,7 +28,7 @@ class User(BaseModel):
     password: str
 
 class Movie(BaseModel):
-    id: Optional[int] = None
+    # id: Optional[int] = None
     title: str = Field(min_length=5, max_length=15)
     overview: str = Field(min_length=15, max_length=50)
     year: int = Field(ge=1, le=2023)
@@ -126,22 +126,49 @@ def create_movie(movie: Movie) -> dict:
 
 @app.put('/movies/{id}', tags=['movies'], response_model=dict, status_code=200)
 def update_movie(id:int, movie: Movie = Body()) -> dict:
-    for item in movies:
-        if item['id'] == id:
-            item['title'] = movie.title
-            item['overview'] = movie.overview
-            item['year'] = movie.year
-            item['rating'] = movie.rating
-            item['category'] = movie.category
-            return JSONResponse(status_code=200, content={"message": "Se ha modificado la pelicula"})
-    raise HTTPException(status_code=404, detail=f"Movie with id {id} not found")
+    # db = Session()
+    # result = db.query(MovieModel).filter(MovieModel.id == id).first()
+    # if not result:
+    #     return JSONResponse(status_code=404, content={'message': "No encontrado"})
+    # result.title = movie.title
+    # result.category = movie.category
+    # result.overview = movie.overview
+    # result.rating = movie.rating
+    # result.year = movie.year
+    # db.commit()
+    # return JSONResponse(status_code=200, content={"message": "Se ha modificado la pelicula"})
+
+    #Another solution
+    db = Session()
+    result = db.query(MovieModel).filter(MovieModel.id == id)
+    if not result.scalar():
+        return JSONResponse(status_code=404, content={'message': "No encontrado"})
+    result.update(dict(movie), synchronize_session=False)
+    db.commit()
+    return JSONResponse(status_code=200, content={"message": "Se ha modificado la pelicula"})
+    # for item in movies:
+    #     if item['id'] == id:
+    #         item['title'] = movie.title
+    #         item['overview'] = movie.overview
+    #         item['year'] = movie.year
+    #         item['rating'] = movie.rating
+    #         item['category'] = movie.category
+    #         return JSONResponse(status_code=200, content={"message": "Se ha modificado la pelicula"})
+    # raise HTTPException(status_code=404, detail=f"Movie with id {id} not found")
 
 @app.delete('/movies/{id}', tags=['movies'], response_model=dict, status_code=200)
 def delete_movie(id:int) -> dict:
-    for item in movies:
-        if item['id'] == id:
-            movies.remove(item)
-            return JSONResponse(status_code=200, content={"message": "Se ha eliminado la pelicula"})
-    raise HTTPException(status_code=404, detail=f"Movie with id {id} not found")
+    db = Session()
+    result = db.query(MovieModel).filter(MovieModel.id == id).first()
+    if not result:
+        return JSONResponse(status_code=404, content={'message': "No encontrado"})
+    db.delete(result)
+    db.commit()
+    return JSONResponse(status_code=200, content={"message": "Se ha eliminado la pelicula"})
+    # for item in movies:
+    #     if item['id'] == id:
+    #         movies.remove(item)
+    #         return JSONResponse(status_code=200, content={"message": "Se ha eliminado la pelicula"})
+    # raise HTTPException(status_code=404, detail=f"Movie with id {id} not found")
     
 
